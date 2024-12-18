@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  bot:
+    build:
+      context: ./Bot
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DB_HOST=postgres_database
+      - DB_PORT=5432
+      - DB_NAME=news
+      - DB_USER=root
+      - DB_PASSWORD=root
+    depends_on:
+      - postgres_database
+    volumes:
+      - ./Bot:/app
+    command: python /app/bot.py
+
+  postgres_database:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: news
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  parser:
+    build:
+      context: ./parser
+    depends_on:
+      - postgres_database
+    volumes:
+      - ./parser:/app
+    command: python /app/parser.py
+
+volumes:
+  db_data:
+

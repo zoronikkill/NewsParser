@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS news (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    date TIMESTAMP NOT NULL,
+    link TEXT NOT NULL UNIQUE,
+    category TEXT NOT NULL
+);
