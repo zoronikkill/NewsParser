@@ -35,7 +35,7 @@ def get_db_connection():
     )
 
 
-MAIN_MENU = [["📰 Новости"]]
+MAIN_MENU = [["📰 Новости"], ["🔍 Поиск новостей"]]
 
 CATEGORY_MENU = [
     [KeyboardButton("🔹 Все Новости")],
@@ -181,12 +181,14 @@ async def handle_news_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['await_period'] = True
 
 
-async def search_news(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def search_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Введите ключевые слова для поиска новостей. Вы также можете указать диапазон дат в формате YYYY-MM-DD YYYY-MM-DD."
+        "Введите ключевые слова для поиска. Вы можете также указать диапазон дат в формате:\n"
+        "`ключевое_слово YYYY-MM-DD YYYY-MM-DD`\n\n"
+        "Примеры: `\nДТП\nДТП 2024-12-01 2024-12-15`",
+        parse_mode="Markdown"
     )
     context.user_data['await_search'] = True
-
 
 async def custom_input_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
@@ -246,6 +248,9 @@ async def custom_input_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             await update.message.reply_text("Некорректный формат. Введите в формате YYYY-MM-DD YYYY-MM-DD.")
         context.user_data.pop('await_range_for_category', None)
 
+    elif text == "🔍 Поиск новостей":
+        await search_menu(update, context)
+
     elif context.user_data.get('await_search'):
         try:
             parts = text.split()
@@ -304,7 +309,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(handle_category_selection, pattern="category_.*"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, custom_input_handler))
     app.add_handler(CallbackQueryHandler(handle_period_selection, pattern="period_.*"))
-    app.add_handler(CommandHandler("search", search_news))
+    app.add_handler(MessageHandler(filters.Regex("🔍 Поиск новостей"), search_menu))
 
 
     print("Бот запущен...")
