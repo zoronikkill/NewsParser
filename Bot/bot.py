@@ -181,6 +181,13 @@ async def handle_news_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['await_period'] = True
 
 
+async def search_news(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Введите ключевые слова для поиска новостей. Вы также можете указать диапазон дат в формате YYYY-MM-DD YYYY-MM-DD."
+    )
+    context.user_data['await_search'] = True
+
+
 async def custom_input_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     selected_category = context.user_data.get('selected_category')
@@ -239,6 +246,32 @@ async def custom_input_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             await update.message.reply_text("Некорректный формат. Введите в формате YYYY-MM-DD YYYY-MM-DD.")
         context.user_data.pop('await_range_for_category', None)
 
+    elif context.user_data.get('await_search'):
+        try:
+            parts = text.split()
+            if len(parts) == 1:
+                keywords = parts[0]
+                start_date = None
+                end_date = None
+            elif len(parts) == 3:
+                keywords = parts[0]
+                start_date, end_date = parts[1], parts[2]
+            else:
+                raise ValueError("Некорректный ввод.")
+
+            query = "SELECT title, date, link FROM news WHERE title ILIKE %s"
+            params = [f"%{keywords}%"]
+
+            if start_date and end_date:
+                query += " AND date BETWEEN %s AND %s"
+                params.extend([start_date, end_date])
+
+            news = fetch_news(query, params)
+            await send_news_response(update, news)
+        except ValueError:
+            await update.message.reply_text("Некорректный ввод. Введите ключевые слова и, при необходимости, диапазон дат в формате YYYY-MM-DD YYYY-MM-DD.")
+        context.user_data.pop('await_search', None)
+
 
 async def send_news_response(target, news):
     MAX_MESSAGE_LENGTH = 4000  
@@ -271,6 +304,7 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(handle_category_selection, pattern="category_.*"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, custom_input_handler))
     app.add_handler(CallbackQueryHandler(handle_period_selection, pattern="period_.*"))
+    app.add_handler(CommandHandler("search", search_news))
 
 
     print("Бот запущен...")
