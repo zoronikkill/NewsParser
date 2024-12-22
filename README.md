@@ -72,38 +72,49 @@ docker compose logs -f
 - Проект полностью контейнеризирован с использованием Docker Compose.
 - Скрипт `build.sh` автоматизирует процесс сборки и развертывания.
 
-### Сервис
-В меню на выбор предоставляются варианты:
-Посмотреть новости из всех категорий 
-Посмотреть новости из определенной категории
-Посмотреть новости, в которых встречается выбранное ключевое слово
-![image](https://github.com/user-attachments/assets/c8134e5f-8223-4bb9-aa0e-2280fee235be)
-![image](https://github.com/user-attachments/assets/743c9e48-4f8e-4cd1-aac2-58f4ab378bdb)
-![image](https://github.com/user-attachments/assets/8a646086-10a2-4f23-8bc9-2a1ca0708dcb)
-![image](https://github.com/user-attachments/assets/08e3c699-382b-400f-9adc-ee9d9819fd00)
-![image](https://github.com/user-attachments/assets/8551e818-62c9-427a-a5b0-20ce7588b741)
-![image](https://github.com/user-attachments/assets/45fa00ae-e268-4639-92f7-ea4b61338e47)
-![image](https://github.com/user-attachments/assets/199c4707-8c05-450c-9620-a6f86b873f45)
-![image](https://github.com/user-attachments/assets/9cf4a478-ea89-463b-a31f-5ff91670c09f)
+### Хранение данных
+Данные о новостях хранятся в таблице `news`, структура которой описана в `db/init.sql`:
+- Используется PostgreSQL, которая запускается в отдельном контейнере.
+- Данные сохраняются в volume Docker, что обеспечивает их сохранность даже при пересборке проекта.
 
+Чтобы одна новость не выводилась в боте несколько раз, в БД новости могут принадлежать к нескольким категориям
 ![image](https://github.com/user-attachments/assets/829bce16-1e29-4025-be31-5ba66c2bcf8f)
 
 
+### Сервис
+В меню на выбор предоставляются варианты:
+
+`
+Посмотреть новости из всех категорий 
+`
+
+`
+Посмотреть новости из определенной категории
+`
+
+`
+Посмотреть новости, в которых встречается выбранное ключевое слово
+`
 
 
+![image](https://github.com/user-attachments/assets/c8134e5f-8223-4bb9-aa0e-2280fee235be)
 
+Выбрав "Все новости", вы можете посмотреть новости за определенное время
 
-### Хранение данных
-Данные о новостях хранятся в таблице `news`, структура которой описана в `db/init.sql`:
-```sql
-CREATE TABLE IF NOT EXISTS news (
-    id SERIAL PRIMARY KEY,
-    title TEXT NOT NULL,
-    date TIMESTAMP NOT NULL,
-    link TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL
-);
-```
+Вот пример с "посмотреть новости из всех категорий за последие N дней". Вам нужно ввести N
+![image](https://github.com/user-attachments/assets/08e3c699-382b-400f-9adc-ee9d9819fd00)
 
-- Используется PostgreSQL, которая запускается в отдельном контейнере.
-- Данные сохраняются в volume Docker, что обеспечивает их сохранность даже при пересборке проекта.
+Вот пример с "посмотреть новости из всех категорий с даты_начала_промежутка до даты_конца_промежутка"
+![image](https://github.com/user-attachments/assets/8551e818-62c9-427a-a5b0-20ce7588b741)
+
+Если вы выбрали "Выбрать категорию", то вам предложать категории новостей, а потом предложат устнановить определенное время
+![image](https://github.com/user-attachments/assets/199c4707-8c05-450c-9620-a6f86b873f45)
+
+Если вы выбрали "Поиск по ключевому слову", то вы можете ввести:
+1) Ключевое слово, и тогда вам выведут из всей бызы данных новости, в которых встречается ключевое слово
+
+![image](https://github.com/user-attachments/assets/2ae72f92-8686-4059-bb2d-dd01a1d8c51a)
+
+2) Ключевое слово дату_начала_промежутка дату_конца_промежутка
+
+![image](https://github.com/user-attachments/assets/9486abec-d02a-4a24-b33c-daa442a417ac)

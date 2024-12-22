@@ -268,8 +268,8 @@ async def custom_input_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             else:
                 raise ValueError("Некорректный ввод.")
 
-            query = "SELECT title, date, link FROM news WHERE title ILIKE %s"
-            params = [f"%{keywords}%"]
+            query = "SELECT title, date, link FROM news WHERE title ~* %s"
+            params = [fr'\m{keywords}\M']
 
             if start_date and end_date:
                 query += " AND date BETWEEN %s AND %s"
