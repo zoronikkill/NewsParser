@@ -117,7 +117,7 @@ def parse_and_save_polit74(section, start_page, end_page):
 def main():
     sections = ['novosti', 'politics', 'economics', 'society', 'incident', 'culture-i-sport']
     pages_per_iteration = 3
-    max_iterations = 100
+    max_iterations = 200
 
     for iteration in range(max_iterations):
         print(f"\n=== Итерация {iteration + 1} ===")
